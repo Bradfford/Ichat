@@ -10,14 +10,16 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import br.com.alura.ichat.adapter.MensagemAdapter;
+import br.com.alura.ichat.app.ChatApplication;
 import br.com.alura.ichat.callback.EnviarMenasgemCallback;
 import br.com.alura.ichat.callback.OuvirMensagensCallBack;
+import br.com.alura.ichat.component.ChatComponent;
 import br.com.alura.ichat.modelo.Mensagem;
 import br.com.alura.ichat.service.ChatService;
 import retrofit2.Call;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,33 +28,35 @@ public class MainActivity extends AppCompatActivity {
     private Button button;
     private ListView listaMensagens;
     private List<Mensagem> mensagens;
-    private ChatService chatService;
+
+    private ChatComponent component;
+
+    @Inject
+    ChatService chatService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ChatApplication app = (ChatApplication) getApplication();
+        component = app.getComponent();
+        component.inject(this);
+
         listaMensagens = (ListView) findViewById(R.id.lv_mensagens);
 
-        //mensagens = Arrays.asList(new Mensagem(1, "Olá alunos!"), new Mensagem(2,"oi"));
         mensagens = new ArrayList<>();
 
         MensagemAdapter adapter = new MensagemAdapter(idCliente, mensagens, this);
 
         listaMensagens.setAdapter(adapter);
 
-        Retrofit retrofit = new Retrofit.Builder().baseUrl("http://10.2.101.19:8080/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        editText = (EditText) findViewById(R.id.texto_enviar);
 
-        chatService = retrofit.create(ChatService.class);
         Call<Mensagem> call = chatService.ouvirMensagem();
         call.enqueue(new OuvirMensagensCallBack(this));
 
         button = (Button) findViewById(R.id.btn_enviar);
-
-        editText = (EditText) findViewById(R.id.texto_enviar);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
