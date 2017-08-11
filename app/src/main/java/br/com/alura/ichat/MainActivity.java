@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 chatService.enviar(new Mensagem(idCliente, editText.getText().toString())).enqueue(new EnviarMenasgemCallback());
             }
         });
-
+//TODO
     }
 
     public void exibirMensagem(Mensagem mensagem){
