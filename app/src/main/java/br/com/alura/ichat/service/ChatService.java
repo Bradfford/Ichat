@@ -11,7 +11,7 @@ import retrofit2.http.POST;
  */
 
 public interface ChatService {
-//TODO
+
     @POST("polling")
     Call<Void> enviar(@Body Mensagem mensagem);
 

@@ -10,7 +10,7 @@ public class Mensagem {
     @SerializedName("text")
     private String texto;
     private int id;
-    //TODO
+
     public Mensagem(int id, String texto) {
         this.id = id;
         this.texto = texto;

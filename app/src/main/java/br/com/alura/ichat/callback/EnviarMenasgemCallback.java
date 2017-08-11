@@ -10,7 +10,7 @@ import retrofit2.Response;
 public class EnviarMenasgemCallback implements retrofit2.Callback<Void> {
     @Override
     public void onResponse(Call<Void> call, Response<Void> response) {
-        //TODO
+
     }
 
     @Override

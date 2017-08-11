@@ -21,7 +21,7 @@ public class OuvirMensagensCallBack implements  retrofit2.Callback<Mensagem> {
     public void onResponse(Call<Mensagem> call, Response<Mensagem> response) {
         if(response.isSuccessful()){
             Mensagem mensagem = response.body();
-            mainActivity.exibirMensagem(mensagem); 
+            mainActivity.exibirMensagem(mensagem);
         }
     }
 
