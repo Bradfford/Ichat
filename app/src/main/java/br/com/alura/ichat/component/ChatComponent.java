@@ -1,6 +1,7 @@
 package br.com.alura.ichat.component;
 
 import br.com.alura.ichat.MainActivity;
+import br.com.alura.ichat.adapter.MensagemAdapter;
 import br.com.alura.ichat.module.ChatModule;
 import dagger.Component;
 
@@ -12,5 +13,7 @@ import dagger.Component;
 public interface ChatComponent {
 
     void inject(MainActivity activity);
+
+    void inject(MensagemAdapter mensagemAdapter);
 
 }

@@ -5,7 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +22,24 @@ import br.com.alura.ichat.callback.OuvirMensagensCallBack;
 import br.com.alura.ichat.component.ChatComponent;
 import br.com.alura.ichat.modelo.Mensagem;
 import br.com.alura.ichat.service.ChatService;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
     private int idCliente = 1;
-    private EditText editText;
-    private Button button;
-    private ListView listaMensagens;
+
+    @BindView(R.id.texto_enviar)
+    EditText editText;
+    @BindView(R.id.btn_enviar)
+    Button button;
+    @BindView(R.id.lv_mensagens)
+    ListView listaMensagens;
+    @BindView(R.id.avatar_usuario)
+    ImageView avatar;
+
     private List<Mensagem> mensagens;
 
     private ChatComponent component;
@@ -34,16 +47,21 @@ public class MainActivity extends AppCompatActivity {
     @Inject
     ChatService chatService;
 
+    @Inject
+    Picasso picasso;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
+
+        picasso.with(this).load("https://api.adorable.io/avatars/285/" + idCliente + ".png").into(avatar);
+
         ChatApplication app = (ChatApplication) getApplication();
         component = app.getComponent();
         component.inject(this);
-
-        listaMensagens = (ListView) findViewById(R.id.lv_mensagens);
 
         mensagens = new ArrayList<>();
 
@@ -51,20 +69,14 @@ public class MainActivity extends AppCompatActivity {
 
         listaMensagens.setAdapter(adapter);
 
-        editText = (EditText) findViewById(R.id.texto_enviar);
-
         Call<Mensagem> call = chatService.ouvirMensagem();
         call.enqueue(new OuvirMensagensCallBack(this));
 
-        button = (Button) findViewById(R.id.btn_enviar);
+    }
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                chatService.enviar(new Mensagem(idCliente, editText.getText().toString())).enqueue(new EnviarMenasgemCallback());
-            }
-        });
-
+    @OnClick(R.id.btn_enviar)
+    public void enviarMensagem(){
+        chatService.enviar(new Mensagem(idCliente, editText.getText().toString())).enqueue(new EnviarMenasgemCallback());
     }
 
     public void exibirMensagem(Mensagem mensagem){
