@@ -10,6 +10,9 @@ import android.widget.ListView;
 
 import com.squareup.picasso.Picasso;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +23,7 @@ import br.com.alura.ichat.app.ChatApplication;
 import br.com.alura.ichat.callback.EnviarMenasgemCallback;
 import br.com.alura.ichat.callback.OuvirMensagensCallBack;
 import br.com.alura.ichat.component.ChatComponent;
+import br.com.alura.ichat.event.MensagemEvent;
 import br.com.alura.ichat.modelo.Mensagem;
 import br.com.alura.ichat.service.ChatService;
 import butterknife.BindView;
@@ -50,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     @Inject
     Picasso picasso;
 
+    @Inject
+    EventBus eventBus;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +77,9 @@ public class MainActivity extends AppCompatActivity {
         listaMensagens.setAdapter(adapter);
 
         Call<Mensagem> call = chatService.ouvirMensagem();
-        call.enqueue(new OuvirMensagensCallBack(this));
+        call.enqueue(new OuvirMensagensCallBack(eventBus,this));
+
+        eventBus.register(this);
 
     }
 
@@ -79,19 +88,25 @@ public class MainActivity extends AppCompatActivity {
         chatService.enviar(new Mensagem(idCliente, editText.getText().toString())).enqueue(new EnviarMenasgemCallback());
     }
 
-    public void exibirMensagem(Mensagem mensagem){
-        mensagens.add(mensagem);
+    @Subscribe
+    public void exibirMensagem(MensagemEvent mensagemEvent){
+        mensagens.add(mensagemEvent.mensagem);
 
         MensagemAdapter adapter = new MensagemAdapter(idCliente, mensagens, this);
 
         listaMensagens.setAdapter(adapter);
-
-        ouvirMensagens();;
     }
 
-    public void ouvirMensagens(){
+    @Subscribe
+    public void ouvirMensagens(MensagemEvent mensagemEvent){
         Call<Mensagem> call = chatService.ouvirMensagem();
-        call.enqueue(new OuvirMensagensCallBack(this));
+        call.enqueue(new OuvirMensagensCallBack(eventBus, this));
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        eventBus.unregister(this);
+    }
 }
