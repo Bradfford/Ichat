@@ -1,8 +1,10 @@
 package br.com.alura.ichat;
 
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -13,6 +15,7 @@ import com.squareup.picasso.Picasso;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +73,11 @@ public class MainActivity extends AppCompatActivity {
         component = app.getComponent();
         component.inject(this);
 
-        mensagens = new ArrayList<>();
+        if(savedInstanceState != null){
+            mensagens = (List<Mensagem>) savedInstanceState.getSerializable("mensagens");
+        } else {
+            mensagens = new ArrayList<>();
+        }
 
         MensagemAdapter adapter = new MensagemAdapter(idCliente, mensagens, this);
 
@@ -86,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.btn_enviar)
     public void enviarMensagem(){
         chatService.enviar(new Mensagem(idCliente, editText.getText().toString())).enqueue(new EnviarMenasgemCallback());
+
+        editText.getText().clear();
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 
     @Subscribe
@@ -101,6 +112,12 @@ public class MainActivity extends AppCompatActivity {
     public void ouvirMensagens(MensagemEvent mensagemEvent){
         Call<Mensagem> call = chatService.ouvirMensagem();
         call.enqueue(new OuvirMensagensCallBack(eventBus, this));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("mensagens", (ArrayList<Mensagem>)mensagens);
     }
 
     @Override
